@@ -7,7 +7,7 @@
 
 import getComponentName from 'shared/getComponentName';
 import invariant from 'shared/invariant';
-import {REACT_ELEMENT_TYPE} from 'shared/ReactSymbols';
+import { REACT_ELEMENT_TYPE } from 'shared/ReactSymbols';
 
 import ReactCurrentOwner from './ReactCurrentOwner';
 
@@ -53,15 +53,15 @@ function hasValidKey(config) {
 }
 
 function defineKeyPropWarningGetter(props, displayName) {
-  const warnAboutAccessingKey = function() {
+  const warnAboutAccessingKey = function () {
     if (__DEV__) {
       if (!specialPropKeyWarningShown) {
         specialPropKeyWarningShown = true;
         console.error(
           '%s: `key` is not a prop. Trying to access it will result ' +
-            'in `undefined` being returned. If you need to access the same ' +
-            'value within the child component, you should pass it as a different ' +
-            'prop. (https://reactjs.org/link/special-props)',
+          'in `undefined` being returned. If you need to access the same ' +
+          'value within the child component, you should pass it as a different ' +
+          'prop. (https://reactjs.org/link/special-props)',
           displayName,
         );
       }
@@ -75,15 +75,15 @@ function defineKeyPropWarningGetter(props, displayName) {
 }
 
 function defineRefPropWarningGetter(props, displayName) {
-  const warnAboutAccessingRef = function() {
+  const warnAboutAccessingRef = function () {
     if (__DEV__) {
       if (!specialPropRefWarningShown) {
         specialPropRefWarningShown = true;
         console.error(
           '%s: `ref` is not a prop. Trying to access it will result ' +
-            'in `undefined` being returned. If you need to access the same ' +
-            'value within the child component, you should pass it as a different ' +
-            'prop. (https://reactjs.org/link/special-props)',
+          'in `undefined` being returned. If you need to access the same ' +
+          'value within the child component, you should pass it as a different ' +
+          'prop. (https://reactjs.org/link/special-props)',
           displayName,
         );
       }
@@ -109,11 +109,11 @@ function warnIfStringRefCannotBeAutoConverted(config) {
       if (!didWarnAboutStringRefs[componentName]) {
         console.error(
           'Component "%s" contains the string ref "%s". ' +
-            'Support for string refs will be removed in a future major release. ' +
-            'This case cannot be automatically converted to an arrow function. ' +
-            'We ask you to manually fix this case by using useRef() or createRef() instead. ' +
-            'Learn more about using refs safely here: ' +
-            'https://reactjs.org/link/strict-mode-string-ref',
+          'Support for string refs will be removed in a future major release. ' +
+          'This case cannot be automatically converted to an arrow function. ' +
+          'We ask you to manually fix this case by using useRef() or createRef() instead. ' +
+          'Learn more about using refs safely here: ' +
+          'https://reactjs.org/link/strict-mode-string-ref',
           componentName,
           config.ref,
         );
@@ -143,7 +143,7 @@ function warnIfStringRefCannotBeAutoConverted(config) {
  * indicating filename, line number, and/or other information.
  * @internal
  */
-const ReactElement = function(type, key, ref, self, source, owner, props) {
+const ReactElement = function (type, key, ref, self, source, owner, props) {
   const element = {
     // This tag allows us to uniquely identify this as a React Element
     $$typeof: REACT_ELEMENT_TYPE,
@@ -345,10 +345,22 @@ export function jsxDEV(type, config, maybeKey, source, self) {
  * Create and return a new ReactElement of the given type.
  * See https://reactjs.org/docs/react-api.html#createelement
  */
+/* 
+  * type 可以是任意标签节点，包括自定义节点
+  * config 属性集合，显示地写在标签里
+  * children 子元素,如果不为text，则仍需creatElement创建
+  */
 export function createElement(type, config, children) {
+  console.log('type', type, config, children)
+  // type div null Hello,world
+  // type class Hello extends react__WEBPACK_IMPORTED_MODULE_0__["Component"] {
+  // render() {
+  //   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__["createElement"]('div', null, `Hello,${this.props.toWhat}`);
+  // … {toWhat: 'world'}toWhat: "world"[[Prototype]]: Object null
   let propName;
 
   // Reserved names are extracted
+  // 属性集合
   const props = {};
 
   let key = null;
@@ -356,7 +368,9 @@ export function createElement(type, config, children) {
   let self = null;
   let source = null;
 
+  // 有属性
   if (config != null) {
+    // ref是否有效
     if (hasValidRef(config)) {
       ref = config.ref;
 
@@ -368,9 +382,11 @@ export function createElement(type, config, children) {
       key = '' + config.key;
     }
 
+    // self 和 source 是开发环境下对代码在编译器中位置等信息进行记录，用于开发环境下调试
     self = config.__self === undefined ? null : config.__self;
     source = config.__source === undefined ? null : config.__source;
     // Remaining properties are added to a new props object
+    // 将 config 中除 key、ref、__self、__source 之外的属性添加到 props 中
     for (propName in config) {
       if (
         hasOwnProperty.call(config, propName) &&
@@ -383,15 +399,21 @@ export function createElement(type, config, children) {
 
   // Children can be more than one argument, and those are transferred onto
   // the newly allocated props object.
+  console.log('arguments', arguments)
+  // arguments长度不定，大于3时表示有多个子元素<div><span>hello world</span> jsjjsjsjs</div>
   const childrenLength = arguments.length - 2;
   if (childrenLength === 1) {
+    // 只有一个子元素
     props.children = children;
   } else if (childrenLength > 1) {
+    // 多个子元素，申请一个定长数组
     const childArray = Array(childrenLength);
     for (let i = 0; i < childrenLength; i++) {
       childArray[i] = arguments[i + 2];
     }
     if (__DEV__) {
+      console.log('Object.freeze', Object.freeze)
+      // 冻结对象，使对象具有不可变性
       if (Object.freeze) {
         Object.freeze(childArray);
       }
@@ -400,6 +422,8 @@ export function createElement(type, config, children) {
   }
 
   // Resolve default props
+  // 如果有 defaultProps，对其遍历并且将用户在标签上未对其手动设置属性添加进 props 中
+  // 此处针对 class 组件类型
   if (type && type.defaultProps) {
     const defaultProps = type.defaultProps;
     for (propName in defaultProps) {
@@ -415,6 +439,7 @@ export function createElement(type, config, children) {
           ? type.displayName || type.name || 'Unknown'
           : type;
       if (key) {
+        // defineProperty定义用props获取key时的警告
         defineKeyPropWarningGetter(props, displayName);
       }
       if (ref) {
