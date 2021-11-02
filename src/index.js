@@ -23,7 +23,19 @@ class Hello extends React.Component {
 
   render() {
     console.log('refs', this.refs)
-    return <div><button onClick={this.buttonClick}>nihao</button></div>
+    return <div id='root'>
+      {/* <button onClick={this.buttonClick}>nihao</button> */}
+      <div id='a1'>
+        <div id='b1'>
+          <div id='c1'>
+            <div id='d1'>d1</div>
+            <div id='d2'>d2</div>
+            <div id='d3'>d3</div>
+          </div>
+          <div id='c2'>c2</div>
+        </div>
+      </div>
+    </div>
   }
 }
 

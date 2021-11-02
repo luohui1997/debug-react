@@ -7,14 +7,14 @@
  * @flow
  */
 
-import type {Thenable, Wakeable} from 'shared/ReactTypes';
-import type {Fiber, FiberRoot} from './ReactInternalTypes';
-import type {Lanes, Lane} from './ReactFiberLane';
-import type {ReactPriorityLevel} from './ReactInternalTypes';
-import type {Interaction} from 'scheduler/src/Tracing';
-import type {SuspenseState} from './ReactFiberSuspenseComponent.old';
-import type {Effect as HookEffect} from './ReactFiberHooks.old';
-import type {StackCursor} from './ReactFiberStack.old';
+import type { Thenable, Wakeable } from 'shared/ReactTypes';
+import type { Fiber, FiberRoot } from './ReactInternalTypes';
+import type { Lanes, Lane } from './ReactFiberLane';
+import type { ReactPriorityLevel } from './ReactInternalTypes';
+import type { Interaction } from 'scheduler/src/Tracing';
+import type { SuspenseState } from './ReactFiberSuspenseComponent.old';
+import type { Effect as HookEffect } from './ReactFiberHooks.old';
+import type { StackCursor } from './ReactFiberStack.old';
 
 import {
   warnAboutDeprecatedLifecycles,
@@ -73,7 +73,7 @@ import {
 // The scheduler is imported here *only* to detect whether it's been mocked
 import * as Scheduler from 'scheduler';
 
-import {__interactionsRef, __subscriberRef} from 'scheduler/tracing';
+import { __interactionsRef, __subscriberRef } from 'scheduler/tracing';
 
 import {
   prepareForCommit,
@@ -113,7 +113,7 @@ import {
   LegacyHiddenComponent,
   ScopeComponent,
 } from './ReactWorkTags';
-import {LegacyRoot} from './ReactRootTags';
+import { LegacyRoot } from './ReactRootTags';
 import {
   NoFlags,
   PerformedWork,
@@ -172,10 +172,10 @@ import {
   schedulerPriorityToLanePriority,
   lanePriorityToSchedulerPriority,
 } from './ReactFiberLane';
-import {requestCurrentTransition, NoTransition} from './ReactFiberTransition';
-import {beginWork as originalBeginWork} from './ReactFiberBeginWork.old';
-import {completeWork} from './ReactFiberCompleteWork.old';
-import {unwindWork, unwindInterruptedWork} from './ReactFiberUnwindWork.old';
+import { requestCurrentTransition, NoTransition } from './ReactFiberTransition';
+import { beginWork as originalBeginWork } from './ReactFiberBeginWork.old';
+import { completeWork } from './ReactFiberCompleteWork.old';
+import { unwindWork, unwindInterruptedWork } from './ReactFiberUnwindWork.old';
 import {
   throwException,
   createRootErrorUpdate,
@@ -193,14 +193,14 @@ import {
   commitResetTextContent,
   isSuspenseBoundaryBeingHidden,
 } from './ReactFiberCommitWork.old';
-import {enqueueUpdate} from './ReactUpdateQueue.old';
-import {resetContextDependencies} from './ReactFiberNewContext.old';
+import { enqueueUpdate } from './ReactUpdateQueue.old';
+import { resetContextDependencies } from './ReactFiberNewContext.old';
 import {
   resetHooksAfterThrow,
   ContextOnlyDispatcher,
   getIsUpdatingOpaqueValueInRenderPhaseInDEV,
 } from './ReactFiberHooks.old';
-import {createCapturedValue} from './ReactCapturedValue';
+import { createCapturedValue } from './ReactCapturedValue';
 import {
   push as pushToStack,
   pop as popFromStack,
@@ -229,12 +229,12 @@ import {
   hasCaughtError,
   clearCaughtError,
 } from 'shared/ReactErrorUtils';
-import {onCommitRoot as onCommitRootDevTools} from './ReactFiberDevToolsHook.old';
-import {onCommitRoot as onCommitRootTestSelector} from './ReactTestSelectors';
+import { onCommitRoot as onCommitRootDevTools } from './ReactFiberDevToolsHook.old';
+import { onCommitRoot as onCommitRootTestSelector } from './ReactTestSelectors';
 
 // Used by `act`
 import enqueueTask from 'shared/enqueueTask';
-import {doesFiberContain} from './ReactFiberTreeReflection';
+import { doesFiberContain } from './ReactFiberTreeReflection';
 
 const ceil = Math.ceil;
 
@@ -371,6 +371,7 @@ export function getWorkInProgressRoot(): FiberRoot | null {
 }
 
 export function requestEventTime() {
+  debugger
   if ((executionContext & (RenderContext | CommitContext)) !== NoContext) {
     // We're inside React, so it's fine to read the actual time.
     return now();
@@ -397,7 +398,7 @@ export function requestUpdateLane(fiber: Fiber): Lane {
   } else if ((mode & ConcurrentMode) === NoMode) {
     return getCurrentPriorityLevel() === ImmediateSchedulerPriority
       ? (SyncLane: Lane)
-      : (SyncBatchedLane: Lane);
+        : (SyncBatchedLane: Lane);
   } else if (
     !deferRenderPhaseUpdateToNextBatch &&
     (executionContext & RenderContext) !== NoContext &&
@@ -504,7 +505,7 @@ function requestRetryLane(fiber: Fiber) {
   } else if ((mode & ConcurrentMode) === NoMode) {
     return getCurrentPriorityLevel() === ImmediateSchedulerPriority
       ? (SyncLane: Lane)
-      : (SyncBatchedLane: Lane);
+        : (SyncBatchedLane: Lane);
   }
 
   // See `requestUpdateLane` for explanation of `currentEventWipLanes`
@@ -523,6 +524,7 @@ export function scheduleUpdateOnFiber(
   warnAboutRenderPhaseUpdatesInDEV(fiber);
 
   const root = markUpdateLaneFromFiberToRoot(fiber, lane);
+  debugger
   if (root === null) {
     warnAboutUpdateOnUnmountedFiberInDEV(fiber);
     return null;
@@ -561,6 +563,7 @@ export function scheduleUpdateOnFiber(
   // priority as an argument to that function and this one.
   const priorityLevel = getCurrentPriorityLevel();
 
+  debugger
   if (lane === SyncLane) {
     if (
       // Check if we're inside unbatchedUpdates
@@ -962,12 +965,14 @@ function markRootSuspended(root, suspendedLanes) {
 
 // This is the entry point for synchronous tasks that don't go
 // through Scheduler
+// 不通过调度器的同步任务的入口
 function performSyncWorkOnRoot(root) {
   invariant(
     (executionContext & (RenderContext | CommitContext)) === NoContext,
     'Should not already be working.',
   );
 
+  // 是否刷新
   flushPassiveEffects();
 
   let lanes;
@@ -1035,6 +1040,7 @@ function performSyncWorkOnRoot(root) {
   const finishedWork: Fiber = (root.current.alternate: any);
   root.finishedWork = finishedWork;
   root.finishedLanes = lanes;
+  debugger
   commitRoot(root);
 
   // Before exiting, make sure there's a callback scheduled for the next
@@ -1070,7 +1076,7 @@ export function flushDiscreteUpdates() {
       if ((executionContext & RenderContext) !== NoContext) {
         console.error(
           'unstable_flushDiscreteUpdates: Cannot flush updates when React is ' +
-            'already rendering.',
+          'already rendering.',
         );
       }
     }
@@ -1210,8 +1216,8 @@ export function flushSync<A, R>(fn: A => R, a: A): R {
     if (__DEV__) {
       console.error(
         'flushSync was called from inside a lifecycle method. React cannot ' +
-          'flush when React is already rendering. Consider moving this call to ' +
-          'a scheduler task or micro task.',
+        'flush when React is already rendering. Consider moving this call to ' +
+        'a scheduler task or micro task.',
       );
     }
     return fn(a);
@@ -1318,8 +1324,10 @@ function prepareFreshStack(root: FiberRoot, lanes: Lanes) {
       interruptedWork = interruptedWork.return;
     }
   }
+  // 创建了一些全局变量
   workInProgressRoot = root;
-  workInProgress = createWorkInProgress(root.current, null);
+  workInProgress = createWorkInProgress(root.current, null); // 返回一个fiber节点
+  console.log('workInProgress', workInProgress)
   workInProgressRootRenderLanes = subtreeRenderLanes = workInProgressRootIncludedLanes = lanes;
   workInProgressRootExitStatus = RootIncomplete;
   workInProgressRootFatalError = null;
@@ -1532,7 +1540,7 @@ function renderRootSync(root: FiberRoot, lanes: Lanes) {
     invariant(
       false,
       'Cannot commit an incomplete root. This error is likely caused by a ' +
-        'bug in React. Please file an issue.',
+      'bug in React. Please file an issue.',
     );
   }
 
@@ -1643,12 +1651,16 @@ function performUnitOfWork(unitOfWork: Fiber): void {
   // The current, flushed, state of this fiber is the alternate. Ideally
   // nothing should rely on this, but relying on it here means that we don't
   // need an additional field on the work in progress.
-  const current = unitOfWork.alternate;
+  const current = unitOfWork.alternate; // alternate应该指向workInProgress对应的fiber节点，workInProgress Fiber的alternate也指向current fiber的alternate
+
   setCurrentDebugFiberInDEV(unitOfWork);
 
   let next;
+  console.log('unitOfWork', unitOfWork)
+  // enableProfilerTimer 开启性能测试模式时使用，在dev测试时已经默认开启
   if (enableProfilerTimer && (unitOfWork.mode & ProfileMode) !== NoMode) {
     startProfilerTimer(unitOfWork);
+    // beginWork会返回下一个待处理的fiber节点
     next = beginWork(current, unitOfWork, subtreeRenderLanes);
     stopProfilerTimerIfRunningAndRecordDelta(unitOfWork, true);
   } else {
@@ -1659,7 +1671,7 @@ function performUnitOfWork(unitOfWork: Fiber): void {
   unitOfWork.memoizedProps = unitOfWork.pendingProps;
   if (next === null) {
     // If this doesn't spawn new work, complete the current work.
-    completeUnitOfWork(unitOfWork);
+    completeUnitOfWork(unitOfWork); // completeWork的上层函数
   } else {
     workInProgress = next;
   }
@@ -1671,6 +1683,7 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
   // Attempt to complete the current unit of work, then move to the next
   // sibling. If there are no more siblings, return to the parent fiber.
   let completedWork = unitOfWork;
+  console.log('completedWork', completedWork)
   do {
     // The current, flushed, state of this fiber is the alternate. Ideally
     // nothing should rely on this, but relying on it here means that we don't
@@ -1934,7 +1947,7 @@ function commitRootImpl(root, renderPriorityLevel) {
   invariant(
     finishedWork !== root.current,
     'Cannot commit the same tree as before. This error is likely caused by ' +
-      'a bug in React. Please file an issue.',
+    'a bug in React. Please file an issue.',
   );
 
   // commitRoot never returns a continuation; it always finishes synchronously.
@@ -2909,7 +2922,7 @@ export function resolveRetryWakeable(boundaryFiber: Fiber, wakeable: Wakeable) {
         invariant(
           false,
           'Pinged unknown suspense boundary type. ' +
-            'This is probably a bug in React.',
+          'This is probably a bug in React.',
         );
     }
   } else {
@@ -2938,16 +2951,16 @@ function jnd(timeElapsed: number) {
   return timeElapsed < 120
     ? 120
     : timeElapsed < 480
-    ? 480
-    : timeElapsed < 1080
-    ? 1080
-    : timeElapsed < 1920
-    ? 1920
-    : timeElapsed < 3000
-    ? 3000
-    : timeElapsed < 4320
-    ? 4320
-    : ceil(timeElapsed / 1960) * 1960;
+      ? 480
+      : timeElapsed < 1080
+        ? 1080
+        : timeElapsed < 1920
+          ? 1920
+          : timeElapsed < 3000
+            ? 3000
+            : timeElapsed < 4320
+              ? 4320
+              : ceil(timeElapsed / 1960) * 1960;
 }
 
 function checkForNestedUpdates() {
@@ -2957,9 +2970,9 @@ function checkForNestedUpdates() {
     invariant(
       false,
       'Maximum update depth exceeded. This can happen when a component ' +
-        'repeatedly calls setState inside componentWillUpdate or ' +
-        'componentDidUpdate. React limits the number of nested updates to ' +
-        'prevent infinite loops.',
+      'repeatedly calls setState inside componentWillUpdate or ' +
+      'componentDidUpdate. React limits the number of nested updates to ' +
+      'prevent infinite loops.',
     );
   }
 
@@ -2968,9 +2981,9 @@ function checkForNestedUpdates() {
       nestedPassiveUpdateCount = 0;
       console.error(
         'Maximum update depth exceeded. This can happen when a component ' +
-          "calls setState inside useEffect, but useEffect either doesn't " +
-          'have a dependency array, or one of the dependencies changes on ' +
-          'every render.',
+        "calls setState inside useEffect, but useEffect either doesn't " +
+        'have a dependency array, or one of the dependencies changes on ' +
+        'every render.',
       );
     }
   }
@@ -3030,9 +3043,9 @@ function warnAboutUpdateOnNotYetMountedFiberInDEV(fiber) {
       setCurrentDebugFiberInDEV(fiber);
       console.error(
         "Can't perform a React state update on a component that hasn't mounted yet. " +
-          'This indicates that you have a side-effect in your render function that ' +
-          'asynchronously later calls tries to update the component. Move this work to ' +
-          'useEffect instead.',
+        'This indicates that you have a side-effect in your render function that ' +
+        'asynchronously later calls tries to update the component. Move this work to ' +
+        'useEffect instead.',
       );
     } finally {
       if (previousFiber) {
@@ -3099,8 +3112,8 @@ function warnAboutUpdateOnUnmountedFiberInDEV(fiber) {
         setCurrentDebugFiberInDEV(fiber);
         console.error(
           "Can't perform a React state update on an unmounted component. This " +
-            'is a no-op, but it indicates a memory leak in your application. To ' +
-            'fix, cancel all subscriptions and asynchronous tasks in %s.',
+          'is a no-op, but it indicates a memory leak in your application. To ' +
+          'fix, cancel all subscriptions and asynchronous tasks in %s.',
           tag === ClassComponent
             ? 'the componentWillUnmount method'
             : 'a useEffect cleanup function',
@@ -3213,8 +3226,8 @@ function warnAboutRenderPhaseUpdatesInDEV(fiber) {
               getComponentName(fiber.type) || 'Unknown';
             console.error(
               'Cannot update a component (`%s`) while rendering a ' +
-                'different component (`%s`). To locate the bad setState() call inside `%s`, ' +
-                'follow the stack trace as described in https://reactjs.org/link/setstate-in-render',
+              'different component (`%s`). To locate the bad setState() call inside `%s`, ' +
+              'follow the stack trace as described in https://reactjs.org/link/setstate-in-render',
               setStateComponentName,
               renderingComponentName,
               renderingComponentName,
@@ -3226,8 +3239,8 @@ function warnAboutRenderPhaseUpdatesInDEV(fiber) {
           if (!didWarnAboutUpdateInRender) {
             console.error(
               'Cannot update during an existing state transition (such as ' +
-                'within `render`). Render methods should be a pure ' +
-                'function of props and state.',
+              'within `render`). Render methods should be a pure ' +
+              'function of props and state.',
             );
             didWarnAboutUpdateInRender = true;
           }
@@ -3239,7 +3252,7 @@ function warnAboutRenderPhaseUpdatesInDEV(fiber) {
 }
 
 // a 'shared' variable that changes when act() opens/closes in tests.
-export const IsThisRendererActing = {current: (false: boolean)};
+export const IsThisRendererActing = { current: (false: boolean) };
 
 export function warnIfNotScopedWithMatchingAct(fiber: Fiber): void {
   if (__DEV__) {
@@ -3253,20 +3266,20 @@ export function warnIfNotScopedWithMatchingAct(fiber: Fiber): void {
         setCurrentDebugFiberInDEV(fiber);
         console.error(
           "It looks like you're using the wrong act() around your test interactions.\n" +
-            'Be sure to use the matching version of act() corresponding to your renderer:\n\n' +
-            '// for react-dom:\n' +
-            // Break up imports to avoid accidentally parsing them as dependencies.
-            'import {act} fr' +
-            "om 'react-dom/test-utils';\n" +
-            '// ...\n' +
-            'act(() => ...);\n\n' +
-            '// for react-test-renderer:\n' +
-            // Break up imports to avoid accidentally parsing them as dependencies.
-            'import TestRenderer fr' +
-            "om react-test-renderer';\n" +
-            'const {act} = TestRenderer;\n' +
-            '// ...\n' +
-            'act(() => ...);',
+          'Be sure to use the matching version of act() corresponding to your renderer:\n\n' +
+          '// for react-dom:\n' +
+          // Break up imports to avoid accidentally parsing them as dependencies.
+          'import {act} fr' +
+          "om 'react-dom/test-utils';\n" +
+          '// ...\n' +
+          'act(() => ...);\n\n' +
+          '// for react-test-renderer:\n' +
+          // Break up imports to avoid accidentally parsing them as dependencies.
+          'import TestRenderer fr' +
+          "om react-test-renderer';\n" +
+          'const {act} = TestRenderer;\n' +
+          '// ...\n' +
+          'act(() => ...);',
         );
       } finally {
         if (previousFiber) {
@@ -3289,15 +3302,15 @@ export function warnIfNotCurrentlyActingEffectsInDEV(fiber: Fiber): void {
     ) {
       console.error(
         'An update to %s ran an effect, but was not wrapped in act(...).\n\n' +
-          'When testing, code that causes React state updates should be ' +
-          'wrapped into act(...):\n\n' +
-          'act(() => {\n' +
-          '  /* fire events that update state */\n' +
-          '});\n' +
-          '/* assert on the output */\n\n' +
-          "This ensures that you're testing the behavior the user would see " +
-          'in the browser.' +
-          ' Learn more at https://reactjs.org/link/wrap-tests-with-act',
+        'When testing, code that causes React state updates should be ' +
+        'wrapped into act(...):\n\n' +
+        'act(() => {\n' +
+        '  /* fire events that update state */\n' +
+        '});\n' +
+        '/* assert on the output */\n\n' +
+        "This ensures that you're testing the behavior the user would see " +
+        'in the browser.' +
+        ' Learn more at https://reactjs.org/link/wrap-tests-with-act',
         getComponentName(fiber.type),
       );
     }
@@ -3317,15 +3330,15 @@ function warnIfNotCurrentlyActingUpdatesInDEV(fiber: Fiber): void {
         setCurrentDebugFiberInDEV(fiber);
         console.error(
           'An update to %s inside a test was not wrapped in act(...).\n\n' +
-            'When testing, code that causes React state updates should be ' +
-            'wrapped into act(...):\n\n' +
-            'act(() => {\n' +
-            '  /* fire events that update state */\n' +
-            '});\n' +
-            '/* assert on the output */\n\n' +
-            "This ensures that you're testing the behavior the user would see " +
-            'in the browser.' +
-            ' Learn more at https://reactjs.org/link/wrap-tests-with-act',
+          'When testing, code that causes React state updates should be ' +
+          'wrapped into act(...):\n\n' +
+          'act(() => {\n' +
+          '  /* fire events that update state */\n' +
+          '});\n' +
+          '/* assert on the output */\n\n' +
+          "This ensures that you're testing the behavior the user would see " +
+          'in the browser.' +
+          ' Learn more at https://reactjs.org/link/wrap-tests-with-act',
           getComponentName(fiber.type),
         );
       } finally {
@@ -3358,23 +3371,23 @@ export function warnIfUnmockedScheduler(fiber: Fiber) {
         didWarnAboutUnmockedScheduler = true;
         console.error(
           'In Concurrent or Sync modes, the "scheduler" module needs to be mocked ' +
-            'to guarantee consistent behaviour across tests and browsers. ' +
-            'For example, with jest: \n' +
-            // Break up requires to avoid accidentally parsing them as dependencies.
-            "jest.mock('scheduler', () => require" +
-            "('scheduler/unstable_mock'));\n\n" +
-            'For more info, visit https://reactjs.org/link/mock-scheduler',
+          'to guarantee consistent behaviour across tests and browsers. ' +
+          'For example, with jest: \n' +
+          // Break up requires to avoid accidentally parsing them as dependencies.
+          "jest.mock('scheduler', () => require" +
+          "('scheduler/unstable_mock'));\n\n" +
+          'For more info, visit https://reactjs.org/link/mock-scheduler',
         );
       } else if (warnAboutUnmockedScheduler === true) {
         didWarnAboutUnmockedScheduler = true;
         console.error(
           'Starting from React v18, the "scheduler" module will need to be mocked ' +
-            'to guarantee consistent behaviour across tests and browsers. ' +
-            'For example, with jest: \n' +
-            // Break up requires to avoid accidentally parsing them as dependencies.
-            "jest.mock('scheduler', () => require" +
-            "('scheduler/unstable_mock'));\n\n" +
-            'For more info, visit https://reactjs.org/link/mock-scheduler',
+          'to guarantee consistent behaviour across tests and browsers. ' +
+          'For example, with jest: \n' +
+          // Break up requires to avoid accidentally parsing them as dependencies.
+          "jest.mock('scheduler', () => require" +
+          "('scheduler/unstable_mock'));\n\n" +
+          'For more info, visit https://reactjs.org/link/mock-scheduler',
         );
       }
     }
@@ -3639,7 +3652,7 @@ export function act(callback: () => Thenable<mixed>): Thenable<void> {
         // if it's _less than_ previousActingUpdatesScopeDepth, then we can assume the 'other' one has warned
         console.error(
           'You seem to have overlapping act() calls, this is not supported. ' +
-            'Be sure to await previous act() calls before making a new one. ',
+          'Be sure to await previous act() calls before making a new one. ',
         );
       }
     }
@@ -3666,13 +3679,13 @@ export function act(callback: () => Thenable<mixed>): Thenable<void> {
       if (typeof Promise !== 'undefined') {
         //eslint-disable-next-line no-undef
         Promise.resolve()
-          .then(() => {})
+          .then(() => { })
           .then(() => {
             if (called === false) {
               console.error(
                 'You called act(async () => ...) without await. ' +
-                  'This could lead to unexpected testing behaviour, interleaving multiple act ' +
-                  'calls and mixing their scopes. You should - await act(async () => ...);',
+                'This could lead to unexpected testing behaviour, interleaving multiple act ' +
+                'calls and mixing their scopes. You should - await act(async () => ...);',
               );
             }
           });
@@ -3719,7 +3732,7 @@ export function act(callback: () => Thenable<mixed>): Thenable<void> {
       if (result !== undefined) {
         console.error(
           'The callback passed to act(...) function ' +
-            'must return undefined, or a Promise. You returned %s',
+          'must return undefined, or a Promise. You returned %s',
           result,
         );
       }

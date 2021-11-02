@@ -7,11 +7,11 @@
  * @flow
  */
 
-import type {FiberRoot, SuspenseHydrationCallbacks} from './ReactInternalTypes';
-import type {RootTag} from './ReactRootTags';
+import type { FiberRoot, SuspenseHydrationCallbacks } from './ReactInternalTypes';
+import type { RootTag } from './ReactRootTags';
 
-import {noTimeout, supportsHydration} from './ReactFiberHostConfig';
-import {createHostRootFiber} from './ReactFiber.old';
+import { noTimeout, supportsHydration } from './ReactFiberHostConfig';
+import { createHostRootFiber } from './ReactFiber.old';
 import {
   NoLanes,
   NoLanePriority,
@@ -22,9 +22,9 @@ import {
   enableSchedulerTracing,
   enableSuspenseCallback,
 } from 'shared/ReactFeatureFlags';
-import {unstable_getThreadID} from 'scheduler/tracing';
-import {initializeUpdateQueue} from './ReactUpdateQueue.old';
-import {LegacyRoot, BlockingRoot, ConcurrentRoot} from './ReactRootTags';
+import { unstable_getThreadID } from 'scheduler/tracing';
+import { initializeUpdateQueue } from './ReactUpdateQueue.old';
+import { LegacyRoot, BlockingRoot, ConcurrentRoot } from './ReactRootTags';
 
 function FiberRootNode(containerInfo, tag, hydrate) {
   this.tag = tag;
@@ -86,18 +86,25 @@ export function createFiberRoot(
   hydrate: boolean,
   hydrationCallbacks: null | SuspenseHydrationCallbacks,
 ): FiberRoot {
+  // 创建fiberRoot，它指向真实的dom节点
   const root: FiberRoot = (new FiberRootNode(containerInfo, tag, hydrate): any);
+
   if (enableSuspenseCallback) {
     root.hydrationCallbacks = hydrationCallbacks;
   }
 
   // Cyclic construction. This cheats the type system right now because
   // stateNode is any.
+  // 调用createFiber(createHostRootFiber) new出来的值为rootFiber，是react应用的根fiber，
+  // 函数里还将fiberRoot的current指向了rootFiber
+  // rootFiber的stateNode指向fiberRoot
   const uninitializedFiber = createHostRootFiber(tag);
   root.current = uninitializedFiber;
   uninitializedFiber.stateNode = root;
 
   initializeUpdateQueue(uninitializedFiber);
+  console.log('fiberRoot的current指向了rootFiber', root)
+  console.log('rootFiber的stateNode指向fiberRoot', uninitializedFiber)
 
   return root;
 }
